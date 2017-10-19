@@ -1,0 +1,16 @@
+{
+  "name": "neo4j-cypher-suite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fluent-cypher": "^0.2.1",
+    "neo4j-driver": "^1.4.1"
+  }
+}
