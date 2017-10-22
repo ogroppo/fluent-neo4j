@@ -1,7 +1,7 @@
 {
-  "name": "neo4j-cypher-suite",
-  "version": "1.0.0",
-  "description": "",
+  "name": "fluent-neo4j",
+  "version": "0.1.1",
+  "description": "Connect, Build & Run Cypher queries, with a fluent API",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

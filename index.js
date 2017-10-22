@@ -1,14 +1,14 @@
-var CypherQuery = require('fluent-cypher');
-var neo4j = require('neo4j-driver').v1;
-var driver = neo4j.driver("bolt://localhost", neo4j.auth.basic("neo4j", "neo1313"));
+var CypherQuery = require('fluent-cypher')
+var neo4j = require('neo4j-driver').v1
+var driver = neo4j.driver(process.env.NEO4J_URL, neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS))
 
 class Neo4jQuery extends CypherQuery{
 	constructor(config = {}){
 		super(config)
-		this.session = driver.session();
+		this.session = driver.session()
 	}
 
-	_format(record){
+	_formatRecord(record){
 		let _record = {}
 		_record.id = record.identity.toNumber()
 		if(record.labels && record.labels.length)
@@ -30,66 +30,137 @@ class Neo4jQuery extends CypherQuery{
 			}
 		})
 
-		return _record;
+		return _record
 	}
 
-	_query(){
-		var startTime = new Date();
+	_formatResult(result){
+		return result.records.map((record)=>{
+			let _record = {}
+			record.forEach((value, key, record)=>{
+				if(Array.isArray(value)){
+					_record[key] = []
+					value.forEach(v => {
+						_record[key].push(this._formatRecord(v))
+					})
+				}else{
+					_record[key] = this._formatRecord(value)
+				}
+			})
+			return _record
+		})
+	}
+
+	get(alias){
+		return this.session
+		.run(
+			this.queryString,
+			this.queryParams
+			)
+		.then(results => {
+			this.session.close()
+			let row = this._formatResult(results)[0]
+			if(alias)
+				return row[alias]
+
+			return row
+		})
+		.catch(error => {
+			console.log(error)
+		})
+	}
+
+	getAll(alias){
+		return this.session
+		.run(
+			this.queryString,
+			this.queryParams
+			)
+		.then(results => {
+			this.session.close()
+			let formattedResults = this._formatResult(results)
+			if(alias)
+				return formattedResults.map((row)=> row[alias])
+
+			return formattedResults
+		})
+		.catch(error => {
+			console.log(error)
+		})
+	}
+
+	getNode(){
+		return this.session
+		.run(
+			this.queryString,
+			this.queryParams
+			)
+		.then(results => {
+			this.session.close()
+			return this._formatResult(results)[0].node
+		})
+		.catch(error => {
+			console.log(error)
+		})
+	}
+
+	getRel(){
 		return this.session
 		.run(
 			this.queryString,
 			this.queryParams
 			)
 		.then(result => {
-			var r = result.records.map((record)=>{
-				let _record = {}
-				record.forEach((value, key, record)=>{
-					if(Array.isArray(value)){
-						_record[key] = [];
-						value.forEach(v => {
-							_record[key].push(this._format(v))
-						})
-					}else{
-						_record[key] = this._format(value)
-					}
-				})
-				return _record;
-			})
-
-			console.log(new Date() - startTime);
-			this.session.close();
-			return r;
+			this.session.close()
+			return this._formatResult(results)[0].rel
 		})
 		.catch(error => {
-			console.log('error', error)
-			this.session.close();
-		});
+			console.log(error)
+		})
 	}
 
-	async get(cb){
-		try{
-			let r = await this._query();
-			return r
-		}catch(err){
-			return err;
-		}
+	getFirst(){
+		return this.session
+		.run(
+			this.queryString,
+			this.queryParams
+			)
+		.then(result => {
+			this.session.close()
+			return this._formatResult(result)[0]
+		})
+		.catch(error => {
+			console.log(error)
+		})
+	}
+
+	getLast(){
+		return this.session
+		.run(
+			this.queryString,
+			this.queryParams
+			)
+		.then(result => {
+			this.session.close()
+			var formattedResults = this._formatResult(result)
+			return formattedResults[formattedResults.length - 1]
+		})
+		.catch(error => {
+			console.log(error)
+		})
 	}
 }
 
-var query = new Neo4jQuery()
-			.matchNode({name: 'Cristo'})
-			.returnNode().get();
-
-
-console.log('query', query)
+module.exports.Neo4jQuery = Neo4jQuery
 
 process.on('exit', function () {
-	driver.close();
-	console.log("exiting")
-});
+	driver.close()
+})
 
 // catch ctrl+c event and exit normally
 process.on('SIGINT', function () {
-	console.log('Ctrl-C...');
-	driver.close();
-});
+	driver.close()
+})
+
+process.on('uncaughtException', function (err) {
+  	driver.close()
+})
