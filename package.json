@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "ava -v",
-    "test-online": "NEO4J_URL=XXX NEO4J_USER=XXX NEO4J_PASS=XXX ava -v"
+    "test": "NEO4J_URL=bolt://hobby-necdejfcclhegbkeceejghal.dbs.graphenedb.com:24786 NEO4J_USER=test-user NEO4J_PASS=b.EDrFqsTGJOVs.Ffxm9FW9iGE0rF6j ava -v",
+    "test-local": "ava -v"
   },
   "author": "",
   "license": "ISC",

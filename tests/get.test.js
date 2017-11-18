@@ -1,18 +1,20 @@
 import test from 'ava';
 import Neo4jQuery from '../index';
 
+const testNodeName = "Test Node"
+
 test('get default', t => {
 	var q = new Neo4jQuery()
-	q.matchNode({name: "Cristo"}).returnNode()
+	q.mergeNode({name: testNodeName}).returnNode()
 	return q.get().then(row => {
-		t.is(row.node.name, "Cristo")
+		t.is(row.node.name, testNodeName)
 	})
 });
 
 test('get alias', t => {
 	var q = new Neo4jQuery()
-	q.matchNode({name: "Cristo"}).returnNode()
+	q.mergeNode({name: testNodeName}).returnNode()
 	return q.get('node').then(node => {
-		t.is(node.name, "Cristo")
+		t.is(node.name, testNodeName)
 	})
 });
