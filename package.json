@@ -1,16 +1,21 @@
 {
   "name": "fluent-neo4j",
-  "version": "0.1.1",
+  "version": "0.2.3",
   "description": "Connect, Build & Run Cypher queries, with a fluent API",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ava -v",
+    "test-online": "NEO4J_URL=XXX NEO4J_USER=XXX NEO4J_PASS=XXX ava -v"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fluent-cypher": "^0.2.1",
-    "neo4j-driver": "^1.4.1"
+    "fluent-cypher": "^0.5.0",
+    "isnot": "^0.2.1",
+    "neo4j-driver": "^1.5.0"
+  },
+  "devDependencies": {
+    "ava": "^0.23.0"
   }
 }
