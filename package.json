@@ -1,6 +1,6 @@
 {
   "name": "fluent-neo4j",
-  "version": "0.2.3",
+  "version": "0.3.5",
   "description": "Connect, Build & Run Cypher queries, with a fluent API",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fluent-cypher": "^0.5.0",
     "isnot": "^0.2.1",
     "neo4j-driver": "^1.5.0"
   },
