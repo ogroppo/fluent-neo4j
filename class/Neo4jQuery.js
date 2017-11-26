@@ -8,8 +8,50 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		super(config)
 		this.session = driver.session()
 
-		this.timestamps = config.timestamps || false
 		this.userId = config.userId
+		this.timestamps = config.timestamps || false
+	}
+
+	_formatRecord(record){
+		let _record = {}
+		_record.id = record.identity.toNumber()
+		if(record.labels && record.labels.length)
+			_record.labels = record.labels
+		if(record.type)
+			_record.type = record.type
+		if(record.start)
+			_record.start = record.start.toNumber()
+		if(record.end)
+			_record.end = record.end.toNumber()
+		if(record.segments)
+			_record.segments = record.segments
+
+		Object.keys(record.properties).forEach((key) => {
+			if(typeof record.properties[key].toNumber === 'function'){
+				_record[key] = record.properties[key].toNumber()
+			}else{
+				_record[key] = record.properties[key]
+			}
+		})
+
+		return _record
+	}
+
+	_formatResults(result){
+		return result.records.map((record)=>{
+			let _record = {}
+			record.forEach((value, key, record)=>{
+				if(Array.isArray(value)){
+					_record[key] = []
+					value.forEach(v => {
+						_record[key].push(this._formatRecord(v))
+					})
+				}else{
+					_record[key] = this._formatRecord(value)
+				}
+			})
+			return _record
+		})
 	}
 
 	get(alias){
@@ -20,14 +62,14 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			let row = this._formatResult(results)[0]
+			let row = this._formatResults(results)[0]
 			if(alias)
 				return row[alias]
 
 			return row
 		})
 		.catch(error => {
-			console.log(error)
+			throw error
 		})
 	}
 
@@ -39,14 +81,14 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			let formattedResults = this._formatResult(results)
+			let formattedResults = this._formatResults(results)
 			if(alias)
 				return formattedResults.map((row)=> row[alias])
 
 			return formattedResults
 		})
 		.catch(error => {
-			console.log(error)
+			throw error
 		})
 	}
 
@@ -58,10 +100,16 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			return this._formatResult(results)[0].node
+			let formattedResults = this._formatResults(results)
+
+			if(formattedResults.length > 1)
+				throw "Your query returned more than one node"
+
+			if(formattedResults[0])
+				return formattedResults[0].node
 		})
 		.catch(error => {
-			console.log(error)
+			throw error
 		})
 	}
 
@@ -71,12 +119,17 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(result => {
+		.then(results => {
 			this.session.close()
-			return this._formatResult(results)[0].rel
+			let formattedResults = this._formatResults(results)
+
+			if(formattedResults.length > 1)
+				throw "Your query returned more than one node"
+
+			return formattedResults[0].rel
 		})
 		.catch(error => {
-			console.log(error)
+			throw error
 		})
 	}
 
@@ -86,12 +139,13 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(result => {
+		.then(results => {
 			this.session.close()
-			return this._formatResult(result)[0]
+			let formattedResults = this._formatResults(results)
+			return formattedResults[0]
 		})
 		.catch(error => {
-			console.log(error)
+			throw error
 		})
 	}
 
@@ -101,13 +155,13 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(result => {
+		.then(results => {
 			this.session.close()
-			var formattedResults = this._formatResult(result)
+			var formattedResults = this._formatResults(results)
 			return formattedResults[formattedResults.length - 1]
 		})
 		.catch(error => {
-			console.log(error)
+			throw error
 		})
 	}
 
@@ -117,8 +171,24 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 		)
+		.then(() => {
+
+		})
 		.catch(error => {
-			console.log(error)
+			throw error
 		})
 	}
 }
+
+process.on('exit', function () {
+	driver.close()
+})
+
+// catch ctrl+c event and exit normally
+process.on('SIGINT', function () {
+	driver.close()
+})
+
+process.on('uncaughtException', function (err) {
+  	driver.close()
+})

@@ -1,8 +1,4 @@
-const {
-	isNotObject, 
-	isNotString,
-	isNotURL
-} = require('isnot')
+const {isNotObject, isNotString, isNotURL, isInt} = require('isnot')
 const {formatNode, formatNodeAliasLabels} = require('../lib/node')
 const {formatProps, formatPropKeys, formatPropsParams, formatCreatedAt, formatCreatedBy, formatUpdatedAt, formatUpdatedBy, formatMatchedAt, formatMatchCount, formatOrderBy} = require('../lib/props')
 const {formatAlias} = require('../lib/alias')
@@ -11,16 +7,12 @@ const {formatList} = require('../lib/utils')
 const CypherTools = require('./CypherTools')
 
 module.exports = class CypherQuery extends CypherTools{
-	constructor(config){
+	constructor(config = {}){
 		super()
 		this.queryString = ''
 		this.queryParams = {}
-	}
-
-	and(...args){
-		this.where(...args)
-
-		return this
+		this.userId = config.userId
+		this.timestamps = config.timestamps || false
 	}
 
 	create(...patterns){
@@ -37,21 +29,37 @@ module.exports = class CypherQuery extends CypherTools{
 		if(isNotObject(node))
 			throw "createNode: node must be object"
 
-		node.alias = this._getCurrentNodeAlias(node.alias)
+		node.alias = this._getValidNodeAlias(node.alias)
 
 		this.create(this._node(node))
-		
+
 		if(this.timestamps)
 			this.set(formatCreatedAt(node))
-		
+
 		return this
 	}
 
-	limit(amount){
-		if(amount && parseInt(amount)){
-			this.queryString += `LIMIT ${parseInt(amount)} `
+	delete(...aliases){
+		if(aliases.length)
+			this.queryString += `DELETE ${formatList(aliases)} `
+	}
 
-		}
+	deleteNode(){
+		this.queryString += `DELETE ${this._getCurrentNodeAlias()} `
+	}
+
+	detachDelete(...aliases){
+		if(aliases.length)
+			this.queryString += `DETACH DELETE ${formatList(aliases)} `
+	}
+
+	detachDeleteNode(){
+		this.queryString += `DETACH DELETE ${this._getCurrentNodeAlias()} `
+	}
+
+	limit(integer){
+		if(isInt(integer) && integer > 0)
+			this.queryString += `LIMIT ${integer} `
 
 		return this
 	}
@@ -85,23 +93,23 @@ module.exports = class CypherQuery extends CypherTools{
 
 	matchChild(node = {}, options = {}){
 
-		node.alias = this._getCurrentNodeAlias(node.alias || 'child')
+		node.alias = this._getValidNodeAlias(node.alias || 'child')
 
-		var previousNode = {alias: this._getPreviousNodeAlias()} 
-		
+		var previousNode = {alias: this._getPreviousNodeAlias()}
+
 		this.optional(options.optional)
-		
+
 		this.match(this._node(previousNode)+this._rel(options.rel)+this._node(node))
 
 		return this
-	}	
+	}
 
 	matchNode(node = {}, options = {}){
 		if(isNotObject(node))
 			throw "matchNode: node must be object"
 
-		node.alias = this._getCurrentNodeAlias(node.alias)
-		
+		node.alias = this._getValidNodeAlias(node.alias)
+
 		this.optional(options.optional)
 		this.match(this._node(node))
 
@@ -129,12 +137,12 @@ module.exports = class CypherQuery extends CypherTools{
 		}
 
 		this.set(...sets)
-		
+
 		return this
 	}
 
 	matchPath(options = {}){
-		
+
 		options.pathAlias = options.pathAlias || 'path'
 
 		options.parentNode = {
@@ -155,12 +163,12 @@ module.exports = class CypherQuery extends CypherTools{
 
 	matchParent(node = {}, options = {}){
 
-		node.alias = this._getCurrentNodeAlias(node.alias || 'parent')
+		node.alias = this._getValidNodeAlias(node.alias || 'parent')
 
-		var previousNode = {alias: this._getPreviousNodeAlias()} 
-		
+		var previousNode = {alias: this._getPreviousNodeAlias()}
+
 		this.optional(options.optional)
-		
+
 		this.match(this._node(node)+this._rel(options.rel)+this._node(previousNode))
 
 		return this
@@ -170,7 +178,7 @@ module.exports = class CypherQuery extends CypherTools{
 		if(isNotObject(rel))
 			throw "matchRel: rel must be object"
 
-		rel.alias = this._getCurrentRelAlias(rel.alias)
+		rel.alias = this._getValidRelAlias(rel.alias)
 
 		this.optional(options.optional)
 		this.match(this._pattern({alias: options.startAlias}, rel, {alias: options.endAlias}))
@@ -209,20 +217,23 @@ module.exports = class CypherQuery extends CypherTools{
 
 	mergeChild(childNode = {}, options = {}){
 
-		childNode.alias = this._getCurrentNodeAlias(childNode.alias || 'child')
+		childNode.alias = this._getValidNodeAlias(childNode.alias || 'child')
 
 		const originNode = {alias: this._getPreviousNodeAlias()}
 
 		this.merge(this._pattern(originNode, options.rel, childNode))
-		
+
 		return this
 	}
 
 	mergeNode(node = {}, options = {}){
 		if(isNotObject(node))
-			throw "matchNode: node must be object"
+			throw "mergeNode: node must be object"
 
-		node.alias = this._getCurrentNodeAlias(node.alias)
+		if(typeof node.id !== "undefined")
+			throw "mergeNode: node cannot have id"
+
+		node.alias = this._getValidNodeAlias(node.alias)
 
 		this.merge(this._node(node))
 
@@ -254,18 +265,18 @@ module.exports = class CypherQuery extends CypherTools{
 				sets.push(formatUpdatedBy(node.alias, this.userId))
 		}
 		this.set(...sets)
-		
+
 		return this
 	}
 
 	mergeParent(node = {}, options = {}){
 
-		node.alias = this._getCurrentNodeAlias(node.alias || 'parent')
+		node.alias = this._getValidNodeAlias(node.alias || 'parent')
 
 		const originNode = {alias: this._getPreviousNodeAlias()}
 
 		this.merge(this._node(node)+this._rel(options.rel)+this._node(originNode))
-		
+
 		return this
 	}
 
@@ -276,10 +287,10 @@ module.exports = class CypherQuery extends CypherTools{
 		if(!rel.type)
 			throw "mergeRel: rel must have type"
 
-		rel.alias = this._getCurrentRelAlias(rel.alias)
-		
+		rel.alias = this._getValidRelAlias(rel.alias)
+
 		this.merge(this._node({alias: options.parentAlias})+this._rel(rel)+this._node({alias: options.childAlias}))
-		
+
 		var onMatchSets = [formatMatchedAt(rel), formatMatchCount(rel)]
 		if(options.onMatchSet)
 			onMatchSets.push(formatProps(rel, options.onMatchSet))
@@ -288,13 +299,13 @@ module.exports = class CypherQuery extends CypherTools{
 		var onCreateSets = [formatCreatedAt(rel)]
 		if(options.onCreateSet)
 			onCreateSets.push(formatProps(rel, options.onCreateSet))
-		
+
 		this.onCreateSet(...onCreateSets)
 
 		var sets = []
 		if(options.set)
 			sets.push(formatProps(rel, options.set))
-		
+
 		this.set(...sets)
 
 		return this
@@ -395,11 +406,8 @@ module.exports = class CypherQuery extends CypherTools{
 		if(isNotString(nodeAlias))
 			throw "Error: returnNode - nodeAlias must be string"
 
-		this.queryString += `RETURN `
-		if(nodeAlias)
-			this.queryString += `${nodeAlias} as `
-
-		this.queryString += `node `
+		nodeAlias = nodeAlias || this._getCurrentNodeAlias()
+		this.queryString += `RETURN ${nodeAlias} as node `
 
 		return this
 	}
@@ -501,10 +509,14 @@ module.exports = class CypherQuery extends CypherTools{
 	}
 
 	with(...args){
-		if(args.length){
+		if(args.length)
 			this.queryString += `WITH ${formatList(args)} `
 
-		}
+		return this
+	}
+
+	withNode(nodeAlias){
+		this.queryString += `WITH ${nodeAlias || this._getCurrentNodeAlias()} `
 
 		return this
 	}
