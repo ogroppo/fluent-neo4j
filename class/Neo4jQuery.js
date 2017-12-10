@@ -10,27 +10,70 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		this.session = driver.session()
 	}
 
-	_formatEntity(entity){
-		let formattedEntity = {}
-		formattedEntity.id = entity.identity.toNumber()
-		if(entity.labels && entity.labels.length)
-			formattedEntity.labels = entity.labels
-		if(entity.type)
-			formattedEntity.type = entity.type
-		if(entity.start)
-			formattedEntity.start = entity.start.toNumber()
-		if(entity.end)
-			formattedEntity.end = entity.end.toNumber()
-		if(entity.segments)
-			formattedEntity.segments = entity.segments
+	_formatNode(node){
+		var formattedNode = {}
+		formattedNode.id = node.identity.toNumber()
+		formattedNode.labels = node.labels
+		Object.assign(formattedNode, this._formatProperties(node.properties))
+		return formattedNode
+	}
 
-		Object.keys(entity.properties).forEach((key) => {
-			if(isFunction(entity.properties[key].toNumber)){
-				formattedEntity[key] = entity.properties[key].toNumber()
+	_formatRel(rel){
+		var formattedRel = {}
+		formattedRel.id = rel.identity.toNumber()
+		formattedRel.type = rel.type
+		formattedRel.start = rel.start.toNumber()
+		formattedRel.end = rel.end.toNumber()
+		Object.assign(formattedRel, this._formatProperties(rel.properties))
+		return formattedRel
+	}
+
+	_formatInteger(integer){
+		return integer.toNumber()
+	}
+
+	_formatProperties(properties){
+		var formattedProperties = {}
+		Object.keys(properties).forEach((key) => {
+			if(properties[key].constructor.name === 'Integer'){
+				formattedProperties[key] = this._formatInteger(properties[key])
 			}else{
-				formattedEntity[key] = entity.properties[key]
+				formattedProperties[key] = properties[key]
 			}
 		})
+		return formattedProperties
+	}
+
+	_formatPath(path){
+		var formattedPath = {}
+		formattedPath.start = this._formatNode(path.start)
+		formattedPath.end = this._formatNode(path.end)
+		formattedPath.segments = path.segments.map((segment)=>{
+			return {
+				start: this._formatNode(segment.start),
+				end: this._formatNode(segment.end),
+				relationship: this._formatRel(segment.relationship),
+			}
+		})
+		return formattedPath
+	}
+
+	_formatEntity(entity){
+		let formattedEntity = {}
+		switch (entity.constructor.name) {
+			case "Integer":
+				formattedEntity = this._formatInteger(entity)
+				break;
+			case "Node":
+				formattedEntity = this._formatNode(entity)
+				break;
+			case "Relationship":
+				formattedEntity = this._formatRel(entity)
+				break;
+			case "Path":
+				formattedEntity = this._formatPath(entity)
+				break;
+		}
 
 		return formattedEntity
 	}
