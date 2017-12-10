@@ -6,9 +6,33 @@ This library allows you to build any cypher query you like and get the query str
 
 Following the official documentation it is better to avoid literals so everything is treated as a param.
 
-You'll need to set env params to connect to neo4j
+## Table of Contents
+* [Usage](#usage)
+* [Building the query](#building)
+	* [CREATE](#createMethods)
+		* [create()](#create)
+		* [createNode()](#createNode)
+		* [createRel()](#createRel)
+	* [MATCH](#matchMethods)
+		* [match()](#match)
+		* [matchNode()](#matchNode)
+		* [matchRel()](#matchRel)
+	* [MERGE](#mergeMethods)
+		* [merge()](#merge)
+		* [mergeNode()](#mergeNode)
+		* [mergeRel()](#mergeRel)
+* [Debug](#debug)
+* [Tests](#tests)
 
-e.g.
+## <a name="usage"></a> Usage
+
+~~~
+
+npm install fluent-neo4j --save
+
+~~~
+
+You'll need to set env params to connect to neo4j
 
 ~~~sh
 
@@ -16,42 +40,27 @@ export NEO4J_URL="bolt://localhost"
 export NEO4J_USER="neo4j"
 export NEO4J_PASS="neo4j"
 
-npm start
-
 ~~~
 
-## Table of Contents
-1. [Usage](#usage)
-2. [Building the query](#building)
-	1. [CREATE](#createMethods)
-		1. [create()](#create)
-		2. [createNode()](#createNode)
-		3. [createRel()](#createRel)
-	2. [MATCH](#matchMethods)
-		1. [match()](#match)
-		2. [matchNode()](#matchNode)
-		3. [matchRel()](#matchRel)
-3. [Debug](#debug)
-4. [Tests](#tests)
-
-## <a name="usage"></a> Usage
+Now you can use the package in your script
 
 ~~~js
 
-const query = new CypherQuery([options])
+const Neo4jQuery = require('fluent-neo4j')
+var query = new Neo4jQuery([options])
 
 query.queryString // => ''
 query.queryParams // => {}
 
 ~~~
 
-#### options
+#### contructor options
 
-``` timestamps ``` Bool, default: __false__
-if you set to true timestamps will be added for you like ```alias.createdAt = timestamp()``` and ```alias.updatedAt = timestamp()```
+` timestamps ` Bool, default: __false__
+if you set to true timestamps will be added for you like `alias.createdAt = timestamp()` and `alias.updatedAt = timestamp()`
 
 
-```userId``` String, if set the properties ```alias.createdBy = {userId}``` and ```alias.updatedBy = {userId}```
+`userId` String, if set the properties `alias.createdBy = {userId}` and `alias.updatedBy = {userId}`
 
 ## <a name="building"></a> Building the query
 
@@ -141,6 +150,44 @@ query.matchRel({alias: 'myRel', type: 'REL'}) // MATCH ()->[rel:`REL`]->()
 
 ~~~
 
+### <a name="mergeMethods"></a> MERGE methods
+
+#### <a name="merge"></a> merge
+
+~~~js
+
+query.merge([...patterns])
+
+query.merge() // ''
+
+query.merge("(node)") // MERGE (node)
+
+query.merge("(node)", "()->[rel:`type`]->()") // MERGE (node), ()->[rel:`type`]->()
+
+~~~
+
+#### <a name="mergeNode"></a> mergeNode
+
+~~~js
+
+query.mergeNode([cypherNode] [, options])
+
+query.mergeNode() // MERGE (node)
+
+query.mergeNode({alias: 'email', name: 'spam@email.com', label: 'Email', labels: ['Verified', 'Blocked']}) // MERGE (email:`Email`:`Verified`:`Blocked`)
+
+~~~
+
+#### <a name="mergeRel"></a> mergeRel
+
+~~~js
+
+query.mergeRel(cypherRel [, options])
+
+query.mergeRel({alias: 'friendship', type: 'friend of'}) // MERGE ()->[friendship:`friend of`]->()
+
+~~~
+
 ### WHERE
 
 - IN
@@ -153,9 +200,10 @@ query.matchRel({alias: 'myRel', type: 'REL'}) // MATCH ()->[rel:`REL`]->()
 
 Provide your own custom regexp
 
-~~~js
 
 NB: You need to escape the regexp youself! It might not throw an error but results will be wrong, use built in function
+
+~~~js
 
 query.matchNode().wherePropRegexp({
 	propName: `(?i).*$(query._escapeStringRegexp("{}+&?!")}.*`,
@@ -218,6 +266,21 @@ Shortcut for .get('node')
 ##### .getRel()
 
 Shortcut for .get('rel')
+
+### <a name="debug"></a> debug
+
+As `query.queryString` is a parametrised string you may want to print a string that you can copy and paste in the browser console.
+
+~~~js
+
+query
+	.matchNode()
+	.debug()     // => MATCH (node)
+	.matchRel()
+	.debug()    // => MATCH (node) MATCH ()-[rel]->)()
+
+~~~
+
 
 
 ### <a name="tests"></a> Tests
