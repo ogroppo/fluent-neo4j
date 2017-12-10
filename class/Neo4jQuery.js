@@ -8,51 +8,54 @@ module.exports = class Neo4jQuery extends CypherQuery{
 	constructor(config = {}){
 		super(config)
 		this.session = driver.session()
-
-		this.userId = config.userId
-		this.timestamps = config.timestamps || false
 	}
 
-	_formatRecord(record){
-		let _record = {}
-		_record.id = record.identity.toNumber()
-		if(record.labels && record.labels.length)
-			_record.labels = record.labels
-		if(record.type)
-			_record.type = record.type
-		if(record.start)
-			_record.start = record.start.toNumber()
-		if(record.end)
-			_record.end = record.end.toNumber()
-		if(record.segments)
-			_record.segments = record.segments
+	_formatEntity(entity){
+		let formattedEntity = {}
+		formattedEntity.id = entity.identity.toNumber()
+		if(entity.labels && entity.labels.length)
+			formattedEntity.labels = entity.labels
+		if(entity.type)
+			formattedEntity.type = entity.type
+		if(entity.start)
+			formattedEntity.start = entity.start.toNumber()
+		if(entity.end)
+			formattedEntity.end = entity.end.toNumber()
+		if(entity.segments)
+			formattedEntity.segments = entity.segments
 
-		Object.keys(record.properties).forEach((key) => {
-			if(typeof record.properties[key].toNumber === 'function'){
-				_record[key] = record.properties[key].toNumber()
+		Object.keys(entity.properties).forEach((key) => {
+			if(isFunction(entity.properties[key].toNumber)){
+				formattedEntity[key] = entity.properties[key].toNumber()
 			}else{
-				_record[key] = record.properties[key]
+				formattedEntity[key] = entity.properties[key]
 			}
 		})
 
-		return _record
+		return formattedEntity
+	}
+
+	_formatRecords(records){
+		return records.map(record => this._formatRecord(record))
+	}
+
+	_formatRecord(record){
+		let formattedRecord = {}
+		record.forEach((entity, alias)=>{
+			if(isArray(entity)){ //collect
+				formattedRecord[alias] = []
+				entity.forEach(_entity => {
+					formattedRecord[alias].push(this._formatEntity(_entity))
+				})
+			}else{
+				formattedRecord[alias] = this._formatEntity(entity)
+			}
+		})
+		return formattedRecord
 	}
 
 	_formatQueryResult(queryResult){
-		return queryResult.records.map((record)=>{
-			let row = {}
-			record.forEach((_fields, alias)=>{
-				if(isArray(_fields)){ //collect
-					row[alias] = []
-					_fields.forEach(v => {
-						row[alias].push(this._formatRecord(v))
-					})
-				}else{
-					row[alias] = this._formatRecord(_fields)
-				}
-			})
-			return row
-		})
+		return this._formatRecords(queryResult.records)
 	}
 
 	get(alias){
@@ -61,9 +64,9 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(results => {
+		.then(queryResult => {
 			this.session.close()
-			let row = this._formatQueryResult(results)[0]
+			let row = this._formatRecord(queryResult.records[0])
 			if(alias)
 				return row[alias]
 
@@ -80,9 +83,9 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(results => {
+		.then(queryResult => {
 			this.session.close()
-			let formattedResults = this._formatQueryResult(results)
+			let formattedResults = this._formatQueryResult(queryResult)
 			if(alias)
 				return formattedResults.map((row)=> row[alias])
 
@@ -99,9 +102,9 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(results => {
+		.then(queryResult => {
 			this.session.close()
-			let formattedResults = this._formatQueryResult(results)
+			let formattedResults = this._formatQueryResult(queryResult)
 
 			if(formattedResults.length > 1)
 				throw "Your query returned more than one node"
@@ -120,9 +123,9 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(results => {
+		.then(queryResult => {
 			this.session.close()
-			let formattedResults = this._formatQueryResult(results)
+			let formattedResults = this._formatQueryResult(queryResult)
 
 			if(formattedResults.length > 1)
 				throw "Your query returned more than one node"
@@ -140,9 +143,9 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(results => {
+		.then(queryResult => {
 			this.session.close()
-			let formattedResults = this._formatQueryResult(results)
+			let formattedResults = this._formatQueryResult(queryResult)
 			return formattedResults[0]
 		})
 		.catch(error => {
@@ -156,9 +159,9 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 			)
-		.then(results => {
+		.then(queryResult => {
 			this.session.close()
-			var formattedResults = this._formatQueryResult(results)
+			var formattedResults = this._formatQueryResult(queryResult)
 			return formattedResults[formattedResults.length - 1]
 		})
 		.catch(error => {
@@ -172,7 +175,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.queryString,
 			this.queryParams
 		)
-		.then((queryResult) => {
+		.then(queryResult => {
 			if(isFunction(cb))
 				cb(queryResult)
 		})
