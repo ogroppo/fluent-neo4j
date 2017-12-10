@@ -23,9 +23,16 @@ npm start
 ## Table of Contents
 1. [Usage](#usage)
 2. [Building the query](#building)
-	1. [CREATE](#create)
-	2. [MATCH](#match)
-3. [Tests](#tests)
+	1. [CREATE](#createMethods)
+		1. [create()](#create)
+		2. [createNode()](#createNode)
+		3. [createRel()](#createRel)
+	2. [MATCH](#matchMethods)
+		1. [match()](#match)
+		2. [matchNode()](#matchNode)
+		3. [matchRel()](#matchRel)
+3. [Debug](#debug)
+4. [Tests](#tests)
 
 ## <a name="usage"></a> Usage
 
@@ -38,17 +45,21 @@ query.queryParams // => {}
 
 ~~~
 
-options:
+#### options
 
-timestamps
+``` timestamps ``` Bool, default: __false__
+if you set to true timestamps will be added for you like ```alias.createdAt = timestamp()``` and ```alias.updatedAt = timestamp()```
 
-userId
+
+```userId``` String, if set the properties ```alias.createdBy = {userId}``` and ```alias.updatedBy = {userId}```
 
 ## <a name="building"></a> Building the query
 
-### <a name="create"></a> CREATE
+### <a name="createMethods"></a> CREATE Methods
 
-- Generic
+#### <a name="create"></a> create
+
+Generic method that accepts custom string as a pattern
 
 ~~~js
 
@@ -62,7 +73,9 @@ query.create("(node)", "()->[rel]->()") // 'CREATE (node), ()->[rel]->()'
 
 ~~~
 
-- Node
+#### <a name="createNode"></a> createNode
+
+Accepts object with properties, labels, alias.
 
 ~~~js
 
@@ -74,7 +87,9 @@ query.createNode({alias: 'myNode', label: 'Obj', labels: ['this', 'fancy label']
 
 ~~~
 
-- Rel
+#### <a name="createRel"></a> createRel
+
+Accepts object with properties, labels, alias.
 
 ~~~js
 
@@ -82,13 +97,13 @@ query.createRel([cypherRel] [, options])
 
 query.createRel() // CREATE ()->[rel]->()
 
-query.createRel({alias: 'myRel', type: 'REL'}) // CREATE ()->[rel:`REL`]->()
+query.createRel({alias: 'myRel', type: 'REL', myProp: 'myVal'}) // CREATE ()->[myRel:`REL` {myProp:'myVal'}]->()
 
 ~~~
 
-### <a name="match"></a> MATCH
+### <a name="matchMethods"></a> MATCH methods
 
-- Generic
+#### <a name="match"></a> match
 
 ~~~js
 
@@ -102,7 +117,7 @@ query.match("(node)", "()->[rel]->()") // MATCH (node), ()->[rel]->()
 
 ~~~
 
-- Node
+#### <a name="matchNode"></a> matchNode
 
 ~~~js
 
@@ -114,7 +129,7 @@ query.matchNode({alias: 'myNode', label: 'Obj', labels: ['this', 'fancy label']}
 
 ~~~
 
-- Rel
+#### <a name="matchRel"></a> matchRel
 
 ~~~js
 

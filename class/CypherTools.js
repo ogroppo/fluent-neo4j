@@ -5,14 +5,14 @@ const {formatRel, relMetaFields} = require('../lib/rel')
 module.exports = class CypherTools{
 	_debug(){
 
-		let _queryString = this.queryString.replace(/(\s[A-Z])/g, "\n$1")
+		let _queryString = this.queryString//.replace(/(MATCH|MERGE|ON|SET|RETURN)/g, "\n$1")
 
 		let _queryParams = this.queryParams
 		for(let param in _queryParams){
 			_queryString = _queryString.replace(`{${param}}`, JSON.stringify(_queryParams[param]) )
 		}
 
-		return _queryString
+		console.log(_queryString)
 	}
 
 	_escapeStringRegexp(string){

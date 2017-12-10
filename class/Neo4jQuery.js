@@ -1,6 +1,7 @@
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO4J_URL, neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS))
 
+const {isArray} = require('isnot')
 const CypherQuery = require('./CypherQuery')
 
 module.exports = class Neo4jQuery extends CypherQuery{
@@ -37,20 +38,20 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		return _record
 	}
 
-	_formatResults(result){
-		return result.records.map((record)=>{
-			let _record = {}
-			record.forEach((value, key, record)=>{
-				if(Array.isArray(value)){
-					_record[key] = []
-					value.forEach(v => {
-						_record[key].push(this._formatRecord(v))
+	_formatQueryResult(queryResult){
+		return queryResult.records.map((record)=>{
+			let row = {}
+			record.forEach((_fields, alias)=>{
+				if(isArray(_fields)){ //collect
+					row[alias] = []
+					_fields.forEach(v => {
+						row[alias].push(this._formatRecord(v))
 					})
 				}else{
-					_record[key] = this._formatRecord(value)
+					row[alias] = this._formatRecord(_fields)
 				}
 			})
-			return _record
+			return row
 		})
 	}
 
@@ -62,7 +63,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			let row = this._formatResults(results)[0]
+			let row = this._formatQueryResult(results)[0]
 			if(alias)
 				return row[alias]
 
@@ -81,7 +82,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			let formattedResults = this._formatResults(results)
+			let formattedResults = this._formatQueryResult(results)
 			if(alias)
 				return formattedResults.map((row)=> row[alias])
 
@@ -100,7 +101,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			let formattedResults = this._formatResults(results)
+			let formattedResults = this._formatQueryResult(results)
 
 			if(formattedResults.length > 1)
 				throw "Your query returned more than one node"
@@ -121,7 +122,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			let formattedResults = this._formatResults(results)
+			let formattedResults = this._formatQueryResult(results)
 
 			if(formattedResults.length > 1)
 				throw "Your query returned more than one node"
@@ -141,7 +142,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			let formattedResults = this._formatResults(results)
+			let formattedResults = this._formatQueryResult(results)
 			return formattedResults[0]
 		})
 		.catch(error => {
@@ -157,7 +158,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(results => {
 			this.session.close()
-			var formattedResults = this._formatResults(results)
+			var formattedResults = this._formatQueryResult(results)
 			return formattedResults[formattedResults.length - 1]
 		})
 		.catch(error => {
