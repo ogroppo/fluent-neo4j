@@ -1,7 +1,7 @@
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO4J_URL, neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS))
 
-const {isArray} = require('isnot')
+const {isArray, isFunction} = require('isnot')
 const CypherQuery = require('./CypherQuery')
 
 module.exports = class Neo4jQuery extends CypherQuery{
@@ -166,14 +166,15 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		})
 	}
 
-	run(){
+	run(cb){
 		return this.session
 		.run(
 			this.queryString,
 			this.queryParams
 		)
-		.then(() => {
-
+		.then((queryResult) => {
+			if(isFunction(cb))
+				cb(queryResult)
 		})
 		.catch(error => {
 			throw error

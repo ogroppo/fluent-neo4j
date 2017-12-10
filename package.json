@@ -4,8 +4,8 @@
   "description": "Connect, Build & Run Cypher queries, with a fluent API",
   "main": "index.js",
   "scripts": {
-		"start": "node index.js",
-		"shell": "NEO4J_URL=bolt://hobby-necdejfcclhegbkeceejghal.dbs.graphenedb.com:24786 NEO4J_USER=test-user NEO4J_PASS=b.EDrFqsTGJOVs.Ffxm9FW9iGE0rF6j node shell.js",
+    "start": "node index.js",
+    "shell": "NEO4J_URL=bolt://hobby-necdejfcclhegbkeceejghal.dbs.graphenedb.com:24786 NEO4J_USER=test-user NEO4J_PASS=b.EDrFqsTGJOVs.Ffxm9FW9iGE0rF6j node shell.js",
     "test": "NEO4J_URL=bolt://hobby-necdejfcclhegbkeceejghal.dbs.graphenedb.com:24786 NEO4J_USER=test-user NEO4J_PASS=b.EDrFqsTGJOVs.Ffxm9FW9iGE0rF6j ava -v",
     "test-local": "ava -v"
   },
@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "inquirer": "^4.0.1",
-    "isnot": "^0.2.1",
+    "isnot": "^0.4.1",
     "neo4j-driver": "^1.5.0"
   },
   "devDependencies": {
