@@ -6,7 +6,7 @@ test.beforeEach('create', t => {
 	q.createNode({prop: 'getLast'})
 	q.createNode({prop: 'getLast'})
 	q.returnNode('node1')
-	return q.getNode().then(node => {
+	return q.fetchNode().then(node => {
 		t.context.lastNodeId = node.id
 	})
 });

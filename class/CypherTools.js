@@ -3,13 +3,23 @@ const {formatNode, nodeMetaFields} = require('../lib/node')
 const {formatRel, relMetaFields} = require('../lib/rel')
 
 module.exports = class CypherTools{
-	debug(){
+	debug(options = {}){
 
 		let _queryString = this.queryString
 
 		let _queryParams = this.queryParams
 		for(let param in _queryParams){
-			_queryString = _queryString.replace(`{${param}}`, JSON.stringify(_queryParams[param]) )
+			_queryString = _queryString.replace(new RegExp(`{${param}}`, 'g'), JSON.stringify(_queryParams[param]) )
+		}
+
+		if(options.emptyLineBefore)
+			console.log()
+
+		if(options.multiLine){
+			_queryString = _queryString.replace(' MERGE', ' \nMERGE')
+			_queryString = _queryString.replace(' RETURN', ' \nRETURN')
+			_queryString = _queryString.replace(' MATCH', ' \nMATCH')
+			console.log()
 		}
 
 		console.log(_queryString)

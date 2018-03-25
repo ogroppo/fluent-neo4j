@@ -215,7 +215,7 @@ query.matchNode().wherePropRegexp({
 
 ### Functions available (they all return promises)
 
-##### .get([alias])
+##### .fetchOne([alias])
 
 Returns first row of results and if specified accesses the alias of the row
 
@@ -224,7 +224,7 @@ Returns first row of results and if specified accesses the alias of the row
 ~~~js
 	var query = new Neo4jQuery()
 		.matchNode({alias: 'myNode', name: 'myName'})
-		.returnNode().get().then((result)=>{
+		.returnNode().fetchOne().then((result)=>{
 			console.log(result) // => {myNode: {name: 'myName'}}
 		})
 ~~~
@@ -232,12 +232,12 @@ Returns first row of results and if specified accesses the alias of the row
 ~~~js
 	var query = new Neo4jQuery()
 		.matchNode({alias: 'myNode', name: 'myName'})
-		.returnNode().get('myNode').then((result)=>{
+		.returnNode().fetchOne('myNode').then((result)=>{
 			console.log(result) // => {name: 'myName'}
 		})
 ~~~
 
-##### .getAll([alias])
+##### .fetchAll([alias])
 
 Returns all rows of results, if specified results will be mapped accessing the alias.
 
@@ -246,7 +246,7 @@ Returns all rows of results, if specified results will be mapped accessing the a
 ~~~js
 	var query = new Neo4jQuery()
 		.matchNode({alias: 'myNode'})
-		.returnNode().getAll().then((result)=>{
+		.returnNode().fetchAll().then((result)=>{
 			console.log(result) // => [{myNode: {name: 'myName'}}, {myNode: {name: 'myName2'}}]
 		})
 ~~~
@@ -254,18 +254,10 @@ Returns all rows of results, if specified results will be mapped accessing the a
 ~~~js
 	var query = new Neo4jQuery()
 		.matchNode({alias: 'myNode'})
-		.returnNode().getAll('myNode').then((result)=>{
+		.returnNode().fetchAll('myNode').then((result)=>{
 			console.log(result) // => [{name: 'myName'}, {name: 'myName2'}]
 		})
 ~~~
-
-##### .getNode()
-
-Shortcut for .get('node')
-
-##### .getRel()
-
-Shortcut for .get('rel')
 
 ### <a name="debug"></a> debug
 
@@ -277,7 +269,7 @@ query
 	.matchNode()
 	.debug()     // => MATCH (node)
 	.matchRel()
-	.debug()    // => MATCH (node) MATCH ()-[rel]->)()
+	.debug()    // => MATCH (node) MATCH ()-[rel]->()
 
 ~~~
 

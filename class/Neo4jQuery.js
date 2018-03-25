@@ -1,7 +1,6 @@
-const neo4j = require('neo4j-driver').v1
-const driver = neo4j.driver(process.env.NEO4J_URL, neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS))
-
 const {isArray, isFunction} = require('isnot')
+
+const driver = require('../driver')
 const CypherQuery = require('./CypherQuery')
 
 module.exports = class Neo4jQuery extends CypherQuery{
@@ -101,7 +100,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		return this._formatRecords(queryResult.records)
 	}
 
-	get(alias){
+	fetchOne(alias){
 		return this.session
 		.run(
 			this.queryString,
@@ -109,6 +108,10 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			)
 		.then(queryResult => {
 			this.session.close()
+
+			if(!queryResult.records.length)
+				return
+
 			let row = this._formatRecord(queryResult.records[0])
 			if(alias)
 				return row[alias]
@@ -120,7 +123,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		})
 	}
 
-	getAll(alias){
+	fetchAll(alias){
 		return this.session
 		.run(
 			this.queryString,
@@ -139,7 +142,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		})
 	}
 
-	getNode(){
+	fetchNode(){
 		return this.session
 		.run(
 			this.queryString,
@@ -160,7 +163,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		})
 	}
 
-	getRel(){
+	fetchRel(){
 		return this.session
 		.run(
 			this.queryString,
@@ -227,16 +230,3 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		})
 	}
 }
-
-process.on('exit', function () {
-	driver.close()
-})
-
-// catch ctrl+c event and exit normally
-process.on('SIGINT', function () {
-	driver.close()
-})
-
-process.on('uncaughtException', function (err) {
-  	driver.close()
-})

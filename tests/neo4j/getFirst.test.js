@@ -15,7 +15,7 @@ test.beforeEach('create', t => {
 	q.createNode({label: 'getFirst', name: 'first'})
 	q.createNode({label: 'getFirst', name: testNodeName})
 	q.returnNode('node')
-	return q.getNode().then(node => {
+	return q.fetchNode().then(node => {
 		t.context.firstNodeId = node.id
 	})
 });

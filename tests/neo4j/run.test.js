@@ -14,7 +14,7 @@ test('run', t => {
 	var q = new Neo4jQuery()
 	q.matchNode({name: testNodeName})
 	q.returnNode()
-	return q.getNode().then(node => {
+	return q.fetchNode().then(node => {
 		t.is(node, undefined)
 	})
 });

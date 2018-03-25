@@ -13,6 +13,7 @@ module.exports = class CypherQuery extends CypherTools{
 		this.queryParams = {}
 		this.userId = config.userId
 		this.timestamps = config.timestamps || false
+		this.clausesUsed = []
 	}
 
 	create(...patterns){
@@ -42,19 +43,27 @@ module.exports = class CypherQuery extends CypherTools{
 	delete(...aliases){
 		if(aliases.length)
 			this.queryString += `DELETE ${formatList(aliases)} `
+
+		return this
 	}
 
 	deleteNode(){
 		this.queryString += `DELETE ${this._getCurrentNodeAlias()} `
+
+		return this
 	}
 
 	detachDelete(...aliases){
 		if(aliases.length)
 			this.queryString += `DETACH DELETE ${formatList(aliases)} `
+
+		return this
 	}
 
 	detachDeleteNode(){
 		this.queryString += `DETACH DELETE ${this._getCurrentNodeAlias()} `
+
+		return this
 	}
 
 	limit(integer){
@@ -82,10 +91,14 @@ module.exports = class CypherQuery extends CypherTools{
 
 	match(...patterns){
 		if(patterns.length){
+			if(this.clausesUsed[this.clausesUsed.length - 1] === 'merge')
+				this.with(this._getPreviousNodeAlias())
+
 			this.queryString += `MATCH `
 			this.queryString += `${formatList(patterns)} `
 
 			this._whereClauseUsed = false
+			this.clausesUsed.push('match')
 		}
 
 		return this
@@ -206,11 +219,12 @@ module.exports = class CypherQuery extends CypherTools{
 	}
 
 	merge(...patterns){
-		this.queryString += `MERGE `
-		if(patterns.length){
-			this.queryString += `${formatList(patterns)} `
+		if(!patterns.length)
+			throw ".merge cannot be called without patterns"
 
-		}
+		this.queryString += `MERGE `
+		this.queryString += `${formatList(patterns)} `
+		this.clausesUsed.push('merge')
 
 		return this
 	}
@@ -338,12 +352,12 @@ module.exports = class CypherQuery extends CypherTools{
 
 	optionalMatchNode(node = {}, options = {}){
 		options.optional = true
-		this.matchNode(node, options)
+		return this.matchNode(node, options)
 	}
 
 	optionalMatchRel(rel = {}, options = {}){
 		options.optional = true
-		this.matchRel(rel, options)
+		return this.matchRel(rel, options)
 	}
 
 	or(...args){
@@ -404,7 +418,7 @@ module.exports = class CypherQuery extends CypherTools{
 
 	returnNode(nodeAlias = ''){
 		if(isNotString(nodeAlias))
-			throw "Error: returnNode - nodeAlias must be string"
+			throw "returnNode: nodeAlias must be string"
 
 		nodeAlias = nodeAlias || this._getCurrentNodeAlias()
 		this.queryString += `RETURN ${nodeAlias} as node `
@@ -428,7 +442,6 @@ module.exports = class CypherQuery extends CypherTools{
 	set(...props){
 		if(props.length){
 			this.queryString += `SET ${formatList(props)} `
-
 		}
 
 		return this
