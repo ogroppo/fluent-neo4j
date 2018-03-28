@@ -2,9 +2,9 @@
   "name": "fluent-neo4j",
   "version": "0.4.1",
   "description": "Connect, Build & Run Cypher queries, with a fluent API",
-  "main": "index.js",
   "scripts": {
-    "test": "NEO4J_URL=bolt://hobby-necdejfcclhegbkeceejghal.dbs.graphenedb.com:24786 NEO4J_USER=test-user NEO4J_PASS=b.EDrFqsTGJOVs.Ffxm9FW9iGE0rF6j ava -v"
+    "test": "NEO4J_URL=bolt://hobby-necdejfcclhegbkeceejghal.dbs.graphenedb.com:24786 NEO4J_USER=test-user NEO4J_PASS=b.EDrFqsTGJOVs.Ffxm9FW9iGE0rF6j ava -v",
+		"links": "npm link fluent-cypher"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +14,6 @@
     "neo4j-driver": "^1.5.0"
   },
   "devDependencies": {
-    "ava": "^0.23.0"
+    "ava": "^0.25.0"
   }
 }
