@@ -5,7 +5,6 @@ This library allows you to build any cypher query you like and get the query str
 In addition you have the methods to fetch the results from your Neo4j instance.
 
 ## Table of Contents
-* [Installation](#installation)
 * [Usage](#usage)
 	* [constuctor([options])](#constuctor)
 * [Methods](#methods)
@@ -13,12 +12,6 @@ In addition you have the methods to fetch the results from your Neo4j instance.
 	* [fetchRows([alias])](#fetchRows)
 	* [fetchLastRow([alias])](#fetchLastRow)
 * [Tests](#tests)
-
-## <a name="installation"></a> Installation
-
-```
-npm install fluent-neo4j --save
-```
 
 ## <a name="usage"></a> Usage
 
