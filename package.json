@@ -18,9 +18,9 @@
   "author": "Orlando Groppo <orlando.groppo@gmail.com>",
   "license": "UNLICENCED",
   "dependencies": {
-    "fluent-cypher": "^0.6.0",
+    "fluent-cypher": "^0.6.2",
     "inquirer": "^4.0.1",
-    "isnot": "^0.6.0",
+    "isnot": "^0.7.0",
     "neo4j-driver": "^1.5.0"
   },
   "devDependencies": {

@@ -27,16 +27,12 @@ Now you can use the package on the server.
 
 ~~~js
 const Neo4jQuery = require('fluent-neo4j')
-var query = new Neo4jQuery([options])
+var query = new Neo4jQuery()
 ~~~
 
 #### constuctor([options])
 
-` timestamps ` Bool, default: __false__
-if you set to true timestamps will be added for you like `alias.createdAt = timestamp()` and `alias.updatedAt = timestamp()`
-
-
-`userId` String, if set the properties `alias.createdBy = {userId}` and `alias.updatedBy = {userId}`
+Same options of [fluent-cypher](https://github.com/ogroppo/fluent-cypher/blob/master/README.md#constructor)
 
 ## <a name="methods"></a> Methods
 

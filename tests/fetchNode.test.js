@@ -1,18 +1,16 @@
 import test from 'ava';
 import Neo4jQuery from '../index';
 
-const testNodeName = "Test Node"
-
 test.before('cleanup', t => {
 	return new Neo4jQuery()
-		.matchNode()
+		.matchNode({test: 'fetchNode'})
 		.detachDeleteNode()
 		.run()
 });
 
-test('fetchNode default', t => {
+test('fetchNode', t => {
 	return new Neo4jQuery()
-		.createNode({name: testNodeName})
+		.createNode({test: 'fetchNode'})
 		.returnNode()
 		.fetchNode().then(node => {
 			t.is(node.name, testNodeName)

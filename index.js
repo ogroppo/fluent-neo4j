@@ -96,12 +96,28 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		return formattedRecord
 	}
 
-	fetchRow(alias){
-		return this.fetchRows(alias).then(rows => rows[0])
+	fetchChild(){
+		return this.fetchRow('child')
 	}
 
 	fetchLastRow(alias){
 		return this.fetchRows(alias).then(rows => rows[rows.length - 1])
+	}
+
+	fetchNode(){
+		return this.fetchRow('node')
+	}
+
+	fetchParent(){
+		return this.fetchRow('parent')
+	}
+
+	fetchRel(){
+		return this.fetchRow('rel')
+	}
+
+	fetchRow(alias){
+		return this.fetchRows(alias).then(rows => rows[0])
 	}
 
 	fetchRows(alias){
@@ -123,20 +139,8 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		})
 	}
 
-	fetchNode(){
-		return this.fetchRow('node')
-	}
-
-	fetchParent(){
-		return this.fetchRow('parent')
-	}
-
 	fetchNodes(){
 		return this.fetchRows('node')
-	}
-
-	fetchRel(){
-		return this.fetchRow('rel')
 	}
 
 	run(cb){
