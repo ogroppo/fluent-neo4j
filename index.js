@@ -130,7 +130,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 			this.session.close()
 			let formattedResults = this._formatRecords(queryResult.records)
 			if(alias)
-				return formattedResults.map((row)=> row[alias])
+				return formattedResults.map(row => row[alias])
 
 			return formattedResults
 		})
@@ -143,15 +143,15 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		return this.fetchRows('node')
 	}
 
-	run(cb){
+	run(){
 		return this.session
 		.run(
 			this.queryString,
 			this.queryParams
 		)
 		.then(queryResult => {
-			if(isFunction(cb))
-				cb(queryResult)
+			this.session.close()
+			return queryResult
 		})
 		.catch(error => {
 			throw error

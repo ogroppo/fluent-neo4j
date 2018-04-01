@@ -6,11 +6,20 @@ In addition you have the methods to fetch the results from your Neo4j instance.
 
 ## Table of Contents
 * [Usage](#usage)
-	* [constuctor([options])](#constuctor)
+	* [constuctor()](#constuctor)
 * [Methods](#methods)
-	* [fetchRow([alias])](#fetchRow)
-	* [fetchRows([alias])](#fetchRows)
-	* [fetchLastRow([alias])](#fetchLastRow)
+	* [fetchRow()](#fetchRow)
+	* [fetchRows()](#fetchRows)
+	* [run()](#run)
+* [Shortcuts](#shortcuts)
+	* [fetchLastRow()](#fetchLastRow)
+	* [fetchNode()](#fetchNode)
+	* [fetchNodes()](#fetchNodes)
+	* [fetchParent()](#fetchParent)
+	* [fetchParents()](#fetchParents)
+	* [fetchChild()](#fetchChild)
+	* [fetchChildren()](#fetchChildren)
+	* [fetchRel()](#fetchRel)
 * [Tests](#tests)
 
 ## <a name="usage"></a> Usage
@@ -36,7 +45,7 @@ Same options of [fluent-cypher](https://github.com/ogroppo/fluent-cypher/blob/ma
 
 ## <a name="methods"></a> Methods
 
-All methods return a promise. So after any method is called concatenation is not possible.
+All methods return a promise. So after any fetch method concatenation is not possible.
 
 #### <a name="fetchRow"></a> fetchRow([alias])
 
@@ -85,6 +94,58 @@ new Neo4jQuery()
 		console.log(rows) // => [{name: 'myName'}, {name: 'myName2'}]
 	})
 ~~~
+
+#### <a name="run"></a> run()
+
+Runs the native `run` method of the driver returning unformatted results.
+
+Use this method if you don't care about the result as it skips parsing of the result object.
+
+**example:** Get the query result as the driver returns it
+
+~~~js
+new Neo4jQuery()
+	.matchNode({alias: 'myNode'})
+	.returnNode()
+	.run().then(queryResult => {
+		console.log(queryResult)
+	// 	{ records:
+  //  [ Record {
+  //      keys: [Array],
+  //      length: 1,
+  //      _fields: [Array],
+  //      _fieldLookup: [Object] },
+  //    Record {
+  //      keys: [Array],
+  //      length: 1,
+  //      _fields: [Array],
+  //      _fieldLookup: [Object] },
+  //    Record {
+  //      keys: [Array],
+  //      length: 1,
+  //      _fields: [Array],
+  //      _fieldLookup: [Object] } ],
+  // summary:
+  //  ResultSummary {
+  //    statement:
+  //     { text: 'MATCH (node {name:{name0}}) RETURN node as node ',
+  //       parameters: [Object] },
+  //    statementType: 'r',
+  //    counters: StatementStatistics { _stats: [Object] },
+  //    updateStatistics: StatementStatistics { _stats: [Object] },
+  //    plan: false,
+  //    profile: false,
+  //    notifications: [],
+  //    server:
+  //     ServerInfo {
+  //       address: 'hobby-necdejfcclhegbkeceejghal.dbs.graphenedb.com:24786',
+  //       version: 'Neo4j/3.3.0' },
+  //    resultConsumedAfter: Integer { low: 1, high: 0 },
+  //    resultAvailableAfter: Integer { low: 1, high: 0 } } }
+	})
+~~~
+
+## <a name="shortcuts"></a> Shortcuts
 
 #### <a name="tests"></a> How to run tests
 
