@@ -1,6 +1,6 @@
 {
   "name": "fluent-neo4j",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Speak fluently to your graph database",
   "scripts": {
     "test": "NEO4J_URL=bolt://hobby-necdejfcclhegbkeceejghal.dbs.graphenedb.com:24786 NEO4J_USER=test-user NEO4J_PASS=b.EDrFqsTGJOVs.Ffxm9FW9iGE0rF6j ava -v",
@@ -19,8 +19,7 @@
   "license": "UNLICENCED",
   "dependencies": {
     "fluent-cypher": "^0.6.2",
-    "inquirer": "^4.0.1",
-    "isnot": "^0.7.0",
+    "isnot": "^0.9.0",
     "neo4j-driver": "^1.5.0"
   },
   "devDependencies": {

@@ -9,6 +9,10 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		this.session = driver.session()
 	}
 
+	__connected(){
+		return this.session;
+	}
+
 	_formatNode(node){
 		var formattedNode = {}
 		formattedNode.id = node.identity.toNumber()
@@ -96,28 +100,59 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		return formattedRecord
 	}
 
-	fetchChild(){
-		return this.fetchRow('child')
-	}
-
-	fetchLastRow(alias){
-		return this.fetchRows(alias).then(rows => rows[rows.length - 1])
+	fetch(){
+		return this.fetchRows().then(rows => {
+			if(rows.length === 1){
+				let firstRow = rows[0]
+				let rowKeys = Object.keys(firstRow)
+				if(rowKeys.length === 1)
+					return firstRow[rowKeys[0]]
+				else
+					return firstRow
+			}else{
+				return rows
+			}
+		})
 	}
 
 	fetchNode(){
 		return this.fetchRow('node')
 	}
 
+	fetchNodes(){
+		return this.fetchRows('node')
+	}
+
 	fetchParent(){
 		return this.fetchRow('parent')
+	}
+
+	fetchParents(){
+		return this.fetchRows('parent')
+	}
+
+	fetchChild(){
+		return this.fetchRow('child')
+	}
+
+	fetchChildren(){
+		return this.fetchRows('child')
 	}
 
 	fetchRel(){
 		return this.fetchRow('rel')
 	}
 
+	fetchRels(){
+		return this.fetchRows('rel')
+	}
+
 	fetchRow(alias){
 		return this.fetchRows(alias).then(rows => rows[0])
+	}
+
+	fetchLastRow(alias){
+		return this.fetchRows(alias).then(rows => rows[rows.length - 1])
 	}
 
 	fetchRows(alias){
@@ -139,11 +174,10 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		})
 	}
 
-	fetchNodes(){
-		return this.fetchRows('node')
-	}
-
 	run(){
+		if(this.config.debug)
+			this.debug()
+
 		return this.session
 		.run(
 			this.queryString,
