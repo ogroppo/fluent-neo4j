@@ -160,7 +160,7 @@ module.exports = class Neo4jQuery extends CypherQuery{
 		.run(
 			this.queryString,
 			this.queryParams
-			)
+		)
 		.then(queryResult => {
 			this.session.close()
 			let formattedResults = this._formatRecords(queryResult.records)

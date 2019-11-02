@@ -27,7 +27,7 @@ In addition you have the methods to fetch the results from your Neo4j instance.
 You'll need to set env params to connect to neo4j
 
 ~~~sh
-export NEO4J_URL="bolt://localhost"
+export NEO4J_URL="bolt://localhost:7687"
 export NEO4J_USER="neo4j"
 export NEO4J_PASS="neo4j"
 ~~~
@@ -36,12 +36,19 @@ Now you can use the package on the server.
 
 ~~~js
 const Neo4jQuery = require('fluent-neo4j')
-var query = new Neo4jQuery()
+
+//or
+
+import Neo4jQuery from 'fluent-neo4j'
 ~~~
 
 #### constuctor([options])
 
-Same options of [fluent-cypher](https://github.com/ogroppo/fluent-cypher/blob/master/README.md#constructor)
+~~~js
+var query = new Neo4jQuery()
+~~~
+
+See constructor options of [fluent-cypher](https://github.com/ogroppo/fluent-cypher/blob/master/README.md#constructor)
 
 ## <a name="methods"></a> Methods
 
@@ -146,6 +153,19 @@ new Neo4jQuery()
 ~~~
 
 ## <a name="shortcuts"></a> Shortcuts
+
+#### <a name="fetchLastRow"></a> fetchLastRow([alias])
+
+Will return the last row of the formatted set.
+
+~~~js
+new Neo4jQuery()
+	.matchNode({alias: 'myNode', label: 'Something'})
+	.returnNode()
+	.fetchLastRow('myNode').then((myNode)=>{
+		console.log(myNode) // => {name: 'last', labels: ['Something']}
+	})
+~~~
 
 #### <a name="tests"></a> How to run tests
 
