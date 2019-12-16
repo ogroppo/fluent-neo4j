@@ -1,5 +1,18 @@
 const neo4j = require('neo4j-driver').v1
-const driver = neo4j.driver(process.env.NEO4J_URL, neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS))
+
+if(!process.env.NEO4J_URL)
+  throw new Error("NEO4J_URL is required")
+
+if(!process.env.NEO4J_USER)
+  throw new Error("NEO4J_USER is required")
+
+if(!process.env.NEO4J_PASS)
+  throw new Error("NEO4J_URL is required")
+
+const driver = neo4j.driver(
+  process.env.NEO4J_URL,
+  neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS)
+)
 
 process.on('exit', function () {
 	driver.close()
