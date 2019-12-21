@@ -1,8 +1,10 @@
 # Fluent Neo4j
 
-This package allows you to build any cypher query you like and get the query string and the parameters object as it's an extension of [fluent-cypher](https://github.com/ogroppo/fluent-cypher)
+This package allows you to run any cypher query you like agains your Neo4j instance in a promise-style.
 
-In addition you have the methods to run the queru or fetch the results from your Neo4j instance.
+The results will be formatted for your convenience.
+
+To build the query check out the API docs of [fluent-cypher](https://github.com/ogroppo/fluent-cypher)
 
 ## Table of Contents
 * [Usage](#usage)
