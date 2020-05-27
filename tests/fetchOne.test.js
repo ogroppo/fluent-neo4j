@@ -24,6 +24,7 @@ test('fetchOne', async t => {
 	let node = await new Neo4jQuery(config)
 		.match({$: 'fetchOneNode', label: 'fetchOne'})
 		.return('*')
+		.orderBy('fetchOneNode.k')
     .fetchOne('fetchOneNode')
       
 	t.is(node.labels.length, 1)
